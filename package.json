@@ -10,7 +10,7 @@
   "name": "db-compare",
   "version": "1.0.0",
   "type": "module",
-  "main": ".",
+  "main": "dist/",
   "scripts": {
     "build": "tsc && tsc-alias",
     "db-compare": "npm run build && node dist/DatabaseCompare.js",

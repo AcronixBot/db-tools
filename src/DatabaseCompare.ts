@@ -4,6 +4,6 @@
  * 
  */
 
-export default class DatabaseBackup {
+export default class DatabaseCompare {
 
 }
