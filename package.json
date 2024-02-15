@@ -1,11 +1,15 @@
 {
   "devDependencies": {
+    "@types/prompts": "^2.4.9",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "mongoose": "^8.0.3"
+    "commander": "^12.0.0",
+    "mongoose": "^8.0.3",
+    "picocolors": "^1.0.0",
+    "prompts": "^2.4.2"
   },
   "name": "db-compare",
   "version": "1.0.0",
@@ -13,6 +17,7 @@
   "main": "dist/",
   "scripts": {
     "build": "tsc && tsc-alias",
+    "db-backup": "node dist/cli.js",
     "db-compare": "npm run build && node dist/DatabaseCompare.js",
     "db-update": "npm run build && node dist/DatabaseUpdate.js"
   },
