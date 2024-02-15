@@ -1,4 +1,4 @@
-import MongooseHelper from "@db/MongooseHelper.js";
+import MongooseHelper from "@db/db/MongooseHelper.js";
 
 /**
  * 
