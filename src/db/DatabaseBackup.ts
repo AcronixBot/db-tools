@@ -1,4 +1,3 @@
-import {connection} from 'mongoose'
 import MongooseHelper from './MongooseHelper.js';
 /**
  * 
@@ -39,15 +38,15 @@ export default class DatabaseBackup {
     }
 
     static async main(config: BackupOptions) {
-        MongooseHelper.connectToDatabase(config.connectionString).then(() => {
-            console.log(connection.db.listCollections());
-        });
+        const mongooseConnection = await MongooseHelper.connectToDatabase(config.connectionString);
+        //TODO figure out why only test retures even i dont have a database or collection named after it
+        console.log(mongooseConnection.connections.map(c => c.name));
 
+        setTimeout(() => mongooseConnection.disconnect(), 5000)
     }
 
     public async main() {
-        const connection = mongoose.connection;
-        console.log(connection.db.listCollections());
+        // console.log(connection.db.listCollections());
     }
 
 
