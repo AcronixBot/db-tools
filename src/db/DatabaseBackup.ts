@@ -1,4 +1,11 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 import MongooseHelper from './MongooseHelper.js';
+import { createDirectoryIfNotExists, createFileIfNotExists, createZipFromDirectory, deleteDirectoryIfExists } from '@db/util/fileUtil.js';
+import { red } from '@db/util/logger.js';
+import { Collection, Document } from 'mongoose';
+
 /**
  * 
  * Creates a backup from the specified database in to a directoreie
@@ -7,7 +14,7 @@ import MongooseHelper from './MongooseHelper.js';
 
 export interface IDatabaseBackupOptions {
     outDir?: string,
-    //Connection String Example: mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/?retryWrites=true&w=majority
+    //Connection String Example: mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/database?retryWrites=true&w=majority
     databaseUser?: string,
     password?: string,
     clusterAndExtension?: string,
@@ -16,7 +23,6 @@ export interface IDatabaseBackupOptions {
 
 export interface BackupOptions {
     connectionString?: string,
-    outDir?: string,
     zip?: boolean
 }
 
@@ -38,25 +44,76 @@ export default class DatabaseBackup {
     }
 
     static async main(config: BackupOptions) {
+
+        const database = this.extractDatabaseFromURI(config.connectionString);
+        if (!database) {
+            return console.log(red(`Could not find database with the provieded connection string!`))
+        }
+
         const mongooseConnection = await MongooseHelper.connectToDatabase(config.connectionString);
-        //TODO figure out why only test retures even i dont have a database or collection named after it
-        console.log(mongooseConnection.connections.map(c => c.name));
 
-        setTimeout(() => mongooseConnection.disconnect(), 5000)
+        const connection = mongooseConnection.connections.find(v => v.name === database);
+        const collections = await connection.db.collections();
+
+        if (collections.length > 0) {
+            //Create temp dir
+            const tempDir = process.cwd() + `\\temp\\`;
+            const outputDir = process.cwd() + `\\backup\\`
+            const tempDirResult = await createDirectoryIfNotExists(tempDir)
+                .catch(error => console.log(red(`Ein Fehler ist beim Überprüfen/Erstellen des Verzeichnisses aufgetreten: ${error.message}`)))
+            if (!tempDirResult) {
+                console.log(red(`Das Verzeichnis ${tempDir} existiert bereits.`));
+            }
+
+
+            //iterate over all collections and write the data to the json
+            collections.forEach(async (collection) => {
+                //@ts-ignore
+                await DatabaseBackup.handleCollection(collection);
+            })
+
+            //create zip if zip
+
+            if (config.zip) {
+                await createZipFromDirectory(tempDir, outputDir + `backup_${new Date().getUTCDate()}.zip`)
+            }
+
+            //delete temp dir if zip has been created
+            if (tempDirResult && config.zip) {
+                const deleteResult = await deleteDirectoryIfExists(tempDir)
+                    .catch(error => console.log(red(`Ein Fehler ist beim Überprüfen/Löschen des Verzeichnisses aufgetreten: ${error.message}`)))
+                if (!deleteResult) {
+                    console.log(red(`Das Verzeichnis ${tempDir} wurde nicht gelöscht.`));
+                }
+            }
+
+            //output the destination of the zip or dir
+
+            
+        }
     }
 
-    public async main() {
-        // console.log(connection.db.listCollections());
-    }
-
-
-    private createTempDir() {
-
-    }
 
     private createZip() {
 
     }
 
+    static extractDatabaseFromURI(uri: string) {
+        //mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/database?retryWrites=true&w=majority
+        //* split(':')[2] -> D1fficultP%40ssw0rd@cluster0.example.mongodb.net/database?retryWrites=true&w=majority
+        //* split('/')[1] -> database?retryWrites=true&w=majority
+        //* split('?')[0] -> database
+        return uri.split(':')[2].split('/')[1].split('?')[0];
+    }
 
+    static async handleCollection(collection: Collection) {
+        const foundedEntry = collection.find();
+        const fileName = process.cwd() + `\\temp\\${collection.collectionName}.json`;
+        if (!foundedEntry) {
+            createFileIfNotExists(fileName, []);
+        }
+        else {
+            createFileIfNotExists(fileName, JSON.stringify(await foundedEntry.toArray(), null, 2));
+        }
+    }
 }
