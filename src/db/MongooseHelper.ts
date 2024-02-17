@@ -5,9 +5,9 @@ import { set, connect } from 'mongoose';
  * 
  */
 export default class MongooseHelper {
-    public static async connectToDatabase() {
+    public static async connectToDatabase(uri: string) {
         set("strictQuery", true);
-        await connect("mongodb+srv://antimention:nQ8hSBtDIu33rZgx@foniyx.8l5ft.mongodb.net/acronixDevelopment?retryWrites=true&w=majority")
+        await connect(uri)
             .catch((err) => {
                 throw err;
             })

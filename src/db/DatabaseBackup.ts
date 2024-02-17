@@ -1,5 +1,4 @@
-import * as mongoose from 'mongoose'
-const { connection } = mongoose;
+import {connection} from 'mongoose'
 import MongooseHelper from './MongooseHelper.js';
 /**
  * 
@@ -14,6 +13,12 @@ export interface IDatabaseBackupOptions {
     password?: string,
     clusterAndExtension?: string,
     database?: string,
+}
+
+export interface BackupOptions {
+    connectionString?: string,
+    outDir?: string,
+    zip?: boolean
 }
 
 export default class DatabaseBackup {
@@ -33,26 +38,26 @@ export default class DatabaseBackup {
         return defaultString;
     }
 
-    public async main() {
-
-
-
-
-
+    static async main(config: BackupOptions) {
+        MongooseHelper.connectToDatabase(config.connectionString).then(() => {
+            console.log(connection.db.listCollections());
+        });
 
     }
 
+    public async main() {
+        const connection = mongoose.connection;
+        console.log(connection.db.listCollections());
+    }
+
+
+    private createTempDir() {
+
+    }
+
+    private createZip() {
+
+    }
+
+
 }
-
-(async () => {
-    await MongooseHelper.connectToDatabase().then((c) => {
-
-        setTimeout(() => {
-            console.log(connection)
-
-            connection.destroy();
-        }, 2000)
-
-
-    });
-})();
