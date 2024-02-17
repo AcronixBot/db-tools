@@ -3,23 +3,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import picocolors from 'picocolors'
 import prompts from 'prompts'
+import DatabaseBackup, { BackupOptions } from '@db/db/DatabaseBackup.js';
 
 const { blue, green, red, yellow } = picocolors;
 const program = new commander.Command();
 const configSafePath = path.resolve(process.cwd(), 'config', 'db.config.json');
 
-console.log(blue("Backup Started..."))
+console.log(blue("[BACKUP] [INFO] Backup Started..."))
 
 
-interface BackupOptions {
-    connectionString?: string,
-    outDir?: string,
-    zip?: boolean
-}
 
-let config: BackupOptions = {
-
-}
 
 
 async function connectionStringQuestion() {
@@ -91,30 +84,48 @@ async function verifyQuestion(configParam: BackupOptions) {
 
     if (typeof verifyConfigQuestion.value === 'boolean') {
         if (verifyConfigQuestion.value === false) {
-            console.log(red('Please start again and enter your config!'))
+            console.log(red('[BACKUP] [ERROR] Please start again and enter your config!'))
             process.exit(0);
         } else {
-            console.log(green('Ok. I start with the backup now!'))
+            console.log(green('[BACKUP] [SUCCESS] Ok. I start with the backup now!'))
         }
     }
 }
 
 async function loadJsonFromFile() {
     let returnValue: BackupOptions | NodeJS.ErrnoException;
-    fs.readFile(configSafePath, 'utf8', (err, data) => {
-        if (err) {
-            returnValue = err;
-            return returnValue;
-        }
-        try {
-            const jsonData = JSON.parse(data) as BackupOptions;
-            returnValue = jsonData;
-        } catch (parseErr) {
-            returnValue = parseErr;
-        }
-    });
+    try {
+        const result = fs.readFileSync(configSafePath, 'utf8');
+        const jsonData = JSON.parse(result) as BackupOptions;
+        returnValue = jsonData;
+    } catch (e) {
+        returnValue = e;
+    }
 
     return returnValue;
+}
+
+function indicateMissingConfigProps(config: BackupOptions) {
+    let missingProps: { [key: string]: boolean | string } = {}
+
+    if (typeof config.zip !== 'boolean') {
+        missingProps.zip = true;
+    }
+
+    if (typeof config.connectionString !== 'string') {
+        missingProps.connectionString = true
+    }
+
+    if (typeof config.outDir !== 'string') {
+        missingProps.outDir = true;
+    }
+
+    return missingProps;
+}
+
+
+async function createBackup(config: BackupOptions) {
+    DatabaseBackup.main(config);
 }
 
 /**
@@ -123,23 +134,25 @@ async function loadJsonFromFile() {
  **
  */
 
+let config: BackupOptions = {/** */ }
+
 program
     .option('-m, --manuel', 'Asks the executor to input all nesessery config options');
 program.parse(process.argv);
 const options = program.opts();
 if (options.manuel) {
-    console.log(blue("Manuel configuration"));
+    console.log(blue("[BACKUP] [INFO] Manuel configuration"));
 
     const connectionStringQuestionResult = await connectionStringQuestion();
     if (typeof connectionStringQuestionResult !== 'string') {
-        console.log(red("The connection string was not valid"))
+        console.log(red("[BACKUP] [ERROR] The connection string was not valid"))
         process.exit(0);
     }
     config.connectionString = connectionStringQuestionResult;
 
     const outDirQuestionResult = await outDirQuestion();
     if (typeof outDirQuestionResult !== 'string') {
-        console.log(red("The out dir was not valid"))
+        console.log(red("[BACKUP] [ERROR] The out dir was not valid"))
         process.exit(0);
     }
     config.outDir = outDirQuestionResult;
@@ -147,11 +160,62 @@ if (options.manuel) {
     const zipQuestionResult = await zipQuestion();
     config.zip = zipQuestionResult;
 
-    const verifyQuestionResult = await verifyQuestion(config);
+    await verifyQuestion(config);
 
+    console.log(green("[BACKUP] [SUCCESS] Starting with the Backup now!"))
+
+    //TODO run the backup function with the config
 } else {
-    console.log(blue("Loading JSON config..."))
+    console.log(blue("[BACKUP] [INFO] Loading JSON config..."))
 
     const loadedConfig = await loadJsonFromFile();
-    //TODO
+
+    if (loadedConfig) {
+        if ('connectionString' in loadedConfig || 'outDir' in loadedConfig || 'zip' in loadedConfig) {
+            const notLoadedValues = Object.entries(indicateMissingConfigProps(loadedConfig));
+
+            if (notLoadedValues.some(v => v[1] === true)) {
+                console.log(yellow('[BACKUP] [WARN] Not all required values could be loaded!'))
+
+                const transformedValues = notLoadedValues.map(v => v[0]);
+
+                if (transformedValues.includes('connectionString')) {
+                    const connectionStringQuestionResult = await connectionStringQuestion();
+                    if (typeof connectionStringQuestionResult !== 'string') {
+                        console.log(red("[BACKUP] [ERROR] The connection string was not valid"))
+                        process.exit(0);
+                    }
+                    config.connectionString = connectionStringQuestionResult;
+                }
+
+                if (transformedValues.includes('zip')) {
+                    const zipQuestionResult = await zipQuestion();
+                    config.zip = zipQuestionResult;
+                }
+
+                if (transformedValues.includes('outDir')) {
+                    const outDirQuestionResult = await outDirQuestion();
+                    if (typeof outDirQuestionResult !== 'string') {
+                        console.log(red("[BACKUP] [ERROR] The out dir was not valid"))
+                        process.exit(0);
+                    }
+                    config.outDir = outDirQuestionResult;
+                }
+
+            } else {
+                console.log(green("[BACKUP] [SUCCESS] Successfully loaded the config!"))
+
+                config = loadedConfig;
+            }
+
+            console.log(green("[BACKUP] [SUCCESS] tarting with the Backup now!"))
+
+            //TODO run the backup function with the config
+            createBackup(config);
+        }
+
+    } else {
+        console.log(red('[BACKUP] [ERROR] Could not load the config. Exit!'))
+        process.exit(0);
+    }
 }
