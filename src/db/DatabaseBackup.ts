@@ -70,7 +70,9 @@ export default class DatabaseBackup {
                     if (allFulfilled) {
                         // create zip if zip
                         if (this.#config.zip) {
-                            createZipFromDirectory(tempDir, outputDir, true);                            
+                            createZipFromDirectory(tempDir, outputDir, true);
+                        } else {
+                            process.exit(0);
                         }
                     } else {
                         // Handle if any of the promises were rejected
