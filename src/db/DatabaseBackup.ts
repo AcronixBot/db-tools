@@ -61,24 +61,22 @@ export default class DatabaseBackup {
             }
 
             // iterate over all collections and write the data to the json files
-            //@ts-expect-error
-            Promise.allSettled(collections.map(collection => this.handleCollection(collection)))
+
+            Promise //@ts-expect-error
+                .allSettled(collections.map(collection => this.handleCollection(collection)))
                 .then(results => {
                     // Check if all promises were fulfilled
                     const allFulfilled = results.every(result => result.status === 'fulfilled');
                     if (allFulfilled) {
                         // create zip if zip
                         if (this.#config.zip) {
-                            createZipFromDirectory(tempDir, outputDir);
+                            createZipFromDirectory(tempDir, outputDir, true);                            
                         }
                     } else {
                         // Handle if any of the promises were rejected
                         console.error('Some collections were not handled successfully.');
                     }
                 });
-
-            //output the destination of the zip or dir
-            console.log(green(`Backup Verzeichnis: ${this.#config.zip ? outputDir : tempDir}`))
         }
     }
 

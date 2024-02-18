@@ -141,6 +141,8 @@ if (options.manuel) {
 
     const loadedConfig = await loadJsonFromFile();
 
+    console.log(loadedConfig)
+
     if (loadedConfig) {
         if ('connectionString' in loadedConfig || 'zip' in loadedConfig) {
             const notLoadedValues = Object.entries(indicateMissingConfigProps(loadedConfig));

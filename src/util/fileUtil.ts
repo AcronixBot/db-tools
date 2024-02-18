@@ -62,7 +62,7 @@ export async function deleteDirectoryIfExists(directoryPath: string) {
 }
 
 
-export async function createZipFromDirectory(dir: string, outDir: string) {
+export async function createZipFromDirectory(dir: string, outDir: string, zip: boolean) {
     // Überprüfen, ob das Verzeichnis existiert
     if (!fs.existsSync(dir)) {
         console.log(red(`The directory '${dir}' does not exist.`))
@@ -81,7 +81,8 @@ export async function createZipFromDirectory(dir: string, outDir: string) {
                         const dirDeleted = result.every(r => r.status === 'fulfilled');
                         if (dirDeleted) {
                             console.log(green('Deleted the temp dir'))
-                            return true;
+                            console.log(green(`Backup Verzeichnis: ${zip ? outDir : dir}`))
+                            process.exit(0);
                         } else {
                             return false;
                         }
