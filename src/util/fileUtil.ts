@@ -73,21 +73,40 @@ export async function createZipFromDirectory(dir: string, outDir: string) {
         // Check if all promises were fulfilled
         const allFulfilled = result.every(result => result.status === 'fulfilled');
         if (allFulfilled) {
-            _createZip(dir, outDir)
+            _createZip(dir, outDir);
+            setTimeout(() => {
+                Promise
+                    .allSettled([deleteDirectoryIfExists(dir)])
+                    .then((result) => {
+                        const dirDeleted = result.every(r => r.status === 'fulfilled');
+                        if (dirDeleted) {
+                            console.log(green('Deleted the temp dir'))
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    })
+                    .catch(e => {
+                        console.log(red(`An error occurred while deleting the temp directory: ${e.message}`))
+                        return false;
+                    })
+            }, 3500)
         } else {
             // Handle if any of the promises were rejected
-            console.error('Some collections were not handled successfully.');
+            console.log(red('Some collections were not handled successfully.'));
+            return false;
         }
-    }).catch(error => console.log(red(`An error occurred while checking/creating the directory: ${error.message}`)))
+    }).catch(error => {
+        console.log(red(`An error occurred while checking/creating the directory: ${error.message}`))
+        return false;
+    })
 }
 
 function _createZip(dir: string, outDir: string) {
     const zipPath = path.normalize(path.resolve(outDir, `backup_${new Date().getTime()}.zip`));
-
     Promise
         .allSettled([zip(dir, zipPath)])
         .then((result) => {
-
             const allFulfilled = result.every(result => result.status === 'fulfilled');
             if (allFulfilled) {
                 console.log(green('Created Zip!'))
