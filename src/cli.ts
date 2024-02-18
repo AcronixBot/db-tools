@@ -8,8 +8,11 @@ import { blue, red, yellow, green } from '@db/util/logger.js';
 const program = new commander.Command();
 const configSafePath = path.resolve(process.cwd(), 'config', 'db.config.json');
 
-console.log(blue("Backup Started..."))
-
+/**
+ ** ****************
+ ** Functions 
+ ** ****************
+ */
 
 async function connectionStringQuestion() {
     const connectionStringQuestion = await prompts({
@@ -96,14 +99,17 @@ function indicateMissingConfigProps(config: BackupOptions) {
 
 
 async function createBackup(config: BackupOptions) {
-    DatabaseBackup.main(config);
+    console.log(green("Starting with the Backup now!"))
+
+    new DatabaseBackup(config).create();
 }
 
 /**
- ** 
- ** Actuel CLI Questions
- **
+ ** ****************
+ ** CLI Execution 
+ ** ****************
  */
+console.log(blue("Backup Started..."))
 
 let config: BackupOptions = {/** */ }
 
@@ -111,6 +117,7 @@ program
     .option('-m, --manuel', 'Asks the executor to input all nesessery config options');
 program.parse(process.argv);
 const options = program.opts();
+
 if (options.manuel) {
     console.log(blue("Manuel configuration"));
 
@@ -128,7 +135,7 @@ if (options.manuel) {
 
     console.log(green("Starting with the Backup now!"))
 
-    //TODO run the backup function with the config
+    createBackup(config);
 } else {
     console.log(blue("Loading JSON config..."))
 
@@ -163,9 +170,6 @@ if (options.manuel) {
                 config = loadedConfig;
             }
 
-            console.log(green("Starting with the Backup now!"))
-
-            //TODO run the backup function with the config
             createBackup(config);
         }
 

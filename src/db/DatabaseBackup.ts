@@ -27,79 +27,65 @@ export interface BackupOptions {
 }
 
 export default class DatabaseBackup {
-    #options: IDatabaseBackupOptions;
+    #config: BackupOptions;
 
-    constructor(options: IDatabaseBackupOptions) {
-        this.#options = options;
+    constructor(config: BackupOptions) {
+        this.#config = config;
     }
 
-    private buildConnectionString() {
-        const defaultString = "mongodb+srv://{{user}}:{{password}}@{{clusterAndExtension}}.mongodb.net/{{database}}?retryWrites=true&w=majorit";
-        defaultString.replace("{{user}}", this.#options.databaseUser);
-        defaultString.replace("{{password}}", this.#options.password);
-        defaultString.replace("{{clusterAndExtension}}", this.#options.clusterAndExtension);
-        defaultString.replace("{{database}}", this.#options.database);
+    async create() {
 
-        return defaultString;
-    }
-
-    static async main(config: BackupOptions) {
-
-        const database = this.extractDatabaseFromURI(config.connectionString);
+        const database = this.extractDatabaseFromURI(this.#config.connectionString);
         if (!database) {
             return console.log(red(`Could not find database with the provieded connection string!`))
         }
 
-        const mongooseConnection = await MongooseHelper.connectToDatabase(config.connectionString);
+        const mongooseConnection = await MongooseHelper.connectToDatabase(this.#config.connectionString);
 
         const connection = mongooseConnection.connections.find(v => v.name === database);
         const collections = await connection.db.collections();
 
         if (collections.length > 0) {
-            //Create temp dir
-            const tempDir = process.cwd() + `\\temp\\`;
-            const outputDir = process.cwd() + `\\backup\\`
-            const tempDirResult = await createDirectoryIfNotExists(tempDir)
+
+            //FIX Everything Syncron from this point
+
+            //Declare dir paths
+            const tempDir = process.cwd() + `\\test\\temp\\`;
+            const outputDir = process.cwd() + `\\test\\backup\\`
+
+            //Create Temp Dir
+            const tempDirResult = createDirectoryIfNotExists(tempDir)
                 .catch(error => console.log(red(`Ein Fehler ist beim Überprüfen/Erstellen des Verzeichnisses aufgetreten: ${error.message}`)))
-            if (!tempDirResult) {
+            if (tempDirResult.then(r => r === false)) {
                 console.log(red(`Das Verzeichnis ${tempDir} existiert bereits.`));
             }
 
-            //iterate over all collections and write the data to the json
-            await Promise.all(collections.map(async (collection, index) => {
-                //@ts-ignore
-                await DatabaseBackup.handleCollection(collection);
-            }))
+            // iterate over all collections and write the data to the json files
+            //@ts-expect-error
+            Promise.allSettled(collections.map(collection => this.handleCollection(collection)))
+                .then(results => {
+                    // Check if all promises were fulfilled
+                    const allFulfilled = results.every(result => result.status === 'fulfilled');
+                    if (allFulfilled) {
+                        // create zip if zip
+                        if (this.#config.zip) {
+                            createZipFromDirectory(tempDir, outputDir);
+                        }
+                    } else {
+                        // Handle if any of the promises were rejected
+                        console.error('Some collections were not handled successfully.');
+                    }
+                });
 
-            //until here everything works fine
-            //create zip if zip
-            // if (config.zip) {
-            //     setTimeout(() => {
-            //         createZipFromDirectory(tempDir, outputDir)
-            //     }, 2500)
-            // }
-
-            // delete temp dir if zip has been created
-
-            // if (tempDirResult && config.zip) {
-            //     const deleteResult = await deleteDirectoryIfExists(tempDir)
-            //         .catch(error => console.log(red(`Ein Fehler ist beim Überprüfen/Löschen des Verzeichnisses aufgetreten: ${error.message}`)))
-            //     if (!deleteResult) {
-            //         console.log(red(`Das Verzeichnis ${tempDir} wurde nicht gelöscht.`));
-            //     }
-            // }
-
+            if(this.#config.zip) {
+                
+            }
             //output the destination of the zip or dir
             // console.log(green(`Backup Verzeichnis: ${config.zip ? outputDir : tempDir}`))
         }
     }
 
-
-    private createZip() {
-
-    }
-
-    static extractDatabaseFromURI(uri: string) {
+    private extractDatabaseFromURI(uri: string) {
         //mongodb+srv://myDatabaseUser:D1fficultP%40ssw0rd@cluster0.example.mongodb.net/database?retryWrites=true&w=majority
         //* split(':')[2] -> D1fficultP%40ssw0rd@cluster0.example.mongodb.net/database?retryWrites=true&w=majority
         //* split('/')[1] -> database?retryWrites=true&w=majority
@@ -107,9 +93,9 @@ export default class DatabaseBackup {
         return uri.split(':')[2].split('/')[1].split('?')[0];
     }
 
-    static async handleCollection(collection: Collection) {
+    private async handleCollection(collection: Collection) {
         const foundedEntry = collection.find();
-        const fileName = process.cwd() + `\\temp\\${collection.collectionName}.json`;
+        const fileName = process.cwd() + `\\test\\temp\\${collection.collectionName}.json`;
         if (!foundedEntry) {
             createFileIfNotExists(fileName, []);
         }
