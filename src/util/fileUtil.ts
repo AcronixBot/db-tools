@@ -1,8 +1,7 @@
 import fs from 'fs';
-import * as archiver from 'archiver';
+import { zip } from 'zip-a-folder';
 import { green, red, yellow } from './logger.js';
 
-const { create } = archiver;
 
 export async function createDirectoryIfNotExists(directoryPath: string) {
     try {
@@ -63,46 +62,36 @@ export async function deleteDirectoryIfExists(directoryPath: string) {
 }
 
 
-export async function createZipFromDirectory(dir: string, outFile: string) {
-    console.log('zip creation started')
+export async function createZipFromDirectory(dir: string, outDir: string) {
 
     // Überprüfen, ob das Verzeichnis existiert
     if (!fs.existsSync(dir)) {
         console.log(red(`Das Verzeichnis '${dir}' existiert nicht.`))
-        return;
+        return false;
     }
 
-    const output = fs.createWriteStream(outFile);
-    const archive = create('zip', {
-        zlib: { level: 9 } // Kompressionsstufe: maximal
-    });
+    const dirCreatonResult = createDirectoryIfNotExists(outDir)
+        .catch(error => console.log(red(`Ein Fehler ist beim Überprüfen/Erstellen des Verzeichnisses aufgetreten: ${error.message}`)))
+    if (!dirCreatonResult) {
+        console.log(red(`Das Verzeichnis ${outDir} existiert bereits.`));
+        return false;
+    }
 
-    // Fehlerbehandlung
-    output.on('error', (error?: Error) => {
-        if (error) {
-            console.log(red('Fehler beim Erstellen der Zip-Datei:'), error);
-        } else {
-            console.log(red('Archivierung abgeschlossen.'));
+
+
+    if (dirCreatonResult) {
+        const dirExist = await fs.promises.stat(outDir).then(stat => stat.isDirectory()).catch(e => { throw e })
+
+        if (dirExist) {
+            const zipResult = await zip(dir, outDir + `backup_${new Date().toISOString()}.zip`);
+
+            if (zipResult instanceof Error) {
+                console.log(red('Could not create Zip: ' + zipResult.message))
+                return false;
+            } else {
+                console.log(green('Created Zip!'))
+                return true;
+            }
         }
-    });
-    archive.on('error', (error?: Error) => {
-        if (error) {
-            console.error(red('Fehler beim Erstellen der Zip-Datei:'), error);
-        } else {
-            console.log(red('Archivierung abgeschlossen.'));
-        }
-    });
-
-    // Dateien hinzufügen
-    archive.directory(dir, false);
-
-    // Abschluss des Archivierungsprozesses
-    output.on('close', () => {
-        console.log(`Die Zip-Datei wurde erfolgreich erstellt: ${outFile}`);
-        console.log(green('Archivierung abgeschlossen.'));
-    });
-
-    // Archivierung starten
-    archive.pipe(output);
-    archive.finalize();
+    }
 }

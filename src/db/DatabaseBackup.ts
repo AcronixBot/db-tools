@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import MongooseHelper from './MongooseHelper.js';
 import { createDirectoryIfNotExists, createFileIfNotExists, createZipFromDirectory, deleteDirectoryIfExists } from '@db/util/fileUtil.js';
-import { red } from '@db/util/logger.js';
+import { green, red } from '@db/util/logger.js';
 import { Collection, Document } from 'mongoose';
 
 /**
@@ -65,31 +65,32 @@ export default class DatabaseBackup {
                 console.log(red(`Das Verzeichnis ${tempDir} existiert bereits.`));
             }
 
-
             //iterate over all collections and write the data to the json
-            collections.forEach(async (collection) => {
+            await Promise.all(collections.map(async (collection, index) => {
                 //@ts-ignore
                 await DatabaseBackup.handleCollection(collection);
-            })
+            }))
 
+            //until here everything works fine
             //create zip if zip
+            // if (config.zip) {
+            //     setTimeout(() => {
+            //         createZipFromDirectory(tempDir, outputDir)
+            //     }, 2500)
+            // }
 
-            if (config.zip) {
-                await createZipFromDirectory(tempDir, outputDir + `backup_${new Date().getUTCDate()}.zip`)
-            }
+            // delete temp dir if zip has been created
 
-            //delete temp dir if zip has been created
-            if (tempDirResult && config.zip) {
-                const deleteResult = await deleteDirectoryIfExists(tempDir)
-                    .catch(error => console.log(red(`Ein Fehler ist beim Überprüfen/Löschen des Verzeichnisses aufgetreten: ${error.message}`)))
-                if (!deleteResult) {
-                    console.log(red(`Das Verzeichnis ${tempDir} wurde nicht gelöscht.`));
-                }
-            }
+            // if (tempDirResult && config.zip) {
+            //     const deleteResult = await deleteDirectoryIfExists(tempDir)
+            //         .catch(error => console.log(red(`Ein Fehler ist beim Überprüfen/Löschen des Verzeichnisses aufgetreten: ${error.message}`)))
+            //     if (!deleteResult) {
+            //         console.log(red(`Das Verzeichnis ${tempDir} wurde nicht gelöscht.`));
+            //     }
+            // }
 
             //output the destination of the zip or dir
-
-            
+            // console.log(green(`Backup Verzeichnis: ${config.zip ? outputDir : tempDir}`))
         }
     }
 
