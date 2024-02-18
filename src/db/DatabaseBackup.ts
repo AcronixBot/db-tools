@@ -50,8 +50,8 @@ export default class DatabaseBackup {
             //FIX Everything Syncron from this point
 
             //Declare dir paths
-            const tempDir = process.cwd() + `\\test\\temp\\`;
-            const outputDir = process.cwd() + `\\test\\backup\\`
+            const tempDir = process.cwd() + `\\temp\\`;
+            const outputDir = process.cwd() + `\\backup\\`
 
             //Create Temp Dir
             const tempDirResult = createDirectoryIfNotExists(tempDir)
@@ -77,11 +77,8 @@ export default class DatabaseBackup {
                     }
                 });
 
-            if(this.#config.zip) {
-                
-            }
             //output the destination of the zip or dir
-            // console.log(green(`Backup Verzeichnis: ${config.zip ? outputDir : tempDir}`))
+            console.log(green(`Backup Verzeichnis: ${this.#config.zip ? outputDir : tempDir}`))
         }
     }
 
@@ -95,7 +92,7 @@ export default class DatabaseBackup {
 
     private async handleCollection(collection: Collection) {
         const foundedEntry = collection.find();
-        const fileName = process.cwd() + `\\test\\temp\\${collection.collectionName}.json`;
+        const fileName = process.cwd() + `\\temp\\${collection.collectionName}.json`;
         if (!foundedEntry) {
             createFileIfNotExists(fileName, []);
         }
