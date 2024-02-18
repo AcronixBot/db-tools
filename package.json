@@ -13,15 +13,13 @@
     "prompts": "^2.4.2",
     "zip-a-folder": "^3.1.6"
   },
-  "name": "db-compare",
+  "name": "db-tools",
   "version": "1.0.0",
   "type": "module",
   "main": "dist/",
   "scripts": {
     "build": "tsc && tsc-alias",
-    "db-backup": "node dist/cli.js",
-    "db-compare": "npm run build && node dist/DatabaseCompare.js",
-    "db-update": "npm run build && node dist/DatabaseUpdate.js"
+    "db-backup": "node dist/cli.js"
   },
   "author": "Voroniyx",
   "license": "MIT",
