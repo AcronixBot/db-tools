@@ -23,5 +23,8 @@
   },
   "author": "Voroniyx",
   "license": "MIT",
-  "description": ""
+  "description": "",
+  "compilerOptions": {
+    "esModuleInterop": true
+  }
 }
