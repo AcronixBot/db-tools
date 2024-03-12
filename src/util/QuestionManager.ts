@@ -2,7 +2,7 @@ import prompts, { PromptObject, PromptType, Answers } from 'prompts'
 
 type Prompt<T, TT extends PromptType> = PromptObject<TT> & {
     resultObjectKey: T,
-    validate: (para: Answers<TT>) => boolean
+    validateForFail?: (para: Answers<TT>) => boolean
 }
 
 export default class PromptManager<T> {
@@ -21,21 +21,22 @@ export default class PromptManager<T> {
     public async run() {
         for (let index = 0; index < this.prompts.length; index++) {
             const element = this.prompts[index];
-            Promise
-                .allSettled([prompts(element)])
-                .then(results => {
-                    const allFullfilled = results.every(r => r.status === 'fulfilled');
-                    if (!allFullfilled) {
-                        return console.error('Some collections were not handled successfully.');
-                    }
-
+            try {
+                const result = await prompts(element);
+                const validationResult = element.validateForFail === undefined ? true : element.validateForFail(result);
+                if (validationResult) {
                     //@ts-expect-error
-                    const promptResult = results[0].value;
-                    const validationResult = element.validate(promptResult);
-                    if (validationResult) {
-                        this.resultObject[element.resultObjectKey] = promptResult[element.name]
-                    }
-                })
+                    this.resultObject[element.resultObjectKey] = result[element.name];
+                } else {
+                    console.error('Validation failed for prompt:', element);
+                    return; // Stop execution if validation fails
+                }
+            } catch (error) {
+                console.error('An error occurred while handling prompt:', element);
+                console.error(error);
+                return; // Stop execution if an error occurs
+            }
         }
+        return this.resultObject;
     }
 }

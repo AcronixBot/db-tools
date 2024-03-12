@@ -12,7 +12,7 @@ const questionManager = new QuestionManager<TestResultObject>()
         message: 'Das ist eine Test Message',
         resultObjectKey: 'anotherTest',
         validate: (para: any) => {
-            return typeof para === 'string';
+            return true
         }
     })
     .addPrompt({
@@ -25,5 +25,4 @@ const questionManager = new QuestionManager<TestResultObject>()
         }
     });
 
-const result = questionManager.run();
-console.log(Promise.allSettled([result]).then((d) => console.log(d[0])))
+questionManager.run();
