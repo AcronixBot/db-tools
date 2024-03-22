@@ -57,7 +57,7 @@ export class BackupHelper {
                         const endResult = await File.createZipFromDirectory(tempDir, outputDir, true);
                         return endResult;
                     } else {
-                        throw new Error("Some collections were not handled successfully.")
+                        throw new DbHelperError("Some collections were not handled successfully.")
                     }
                 });
             disconnect();

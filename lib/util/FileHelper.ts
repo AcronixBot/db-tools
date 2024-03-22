@@ -68,7 +68,7 @@ export default class File {
                         .allSettled([File.deleteDirectoryIfExists(dir)])
                         .then((result) => {
                             //@ts-ignore
-                            if (result.some(v => v.value)) {
+                            if (result.some(v => v.value === false)) {
                                 return false;
                             }
                             const dirDeleted = result.every(r => r.status === 'fulfilled')
