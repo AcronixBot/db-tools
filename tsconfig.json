@@ -1,20 +1,20 @@
 {
-    "compilerOptions": {
-      "target": "ES2021",
-      "module": "ES2022",
-      "strict": false,
-      "moduleResolution": "node",
-      "resolveJsonModule": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "outDir": "dist/",
-      "baseUrl": "./",
-      "pretty": true,
-      "paths": {
-        "@db/*": ["src/*"],
-      }
-    },
-    "include": [
-      "src", "src/index.ts",
-    ],
-  }
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ES2022",
+    "strict": false,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "dist/",
+    "baseUrl": "./",
+    "pretty": true,
+    "declaration": true,
+    "paths": {
+      "@db/*": ["src/*"],
+      "@lib/*": ["lib/*"]
+    }
+  },
+  "include": ["src", "src/index.ts", "lib"]
+}

@@ -6,3 +6,6 @@ config
 temp
 test
 backup
+*test.js
+*test.ts
+testOutDir

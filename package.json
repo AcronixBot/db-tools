@@ -13,10 +13,10 @@
     "prompts": "^2.4.2",
     "zip-a-folder": "^3.1.6"
   },
-  "name": "db-tools",
+  "name": "@voroniyx/db-tools",
   "version": "1.0.0",
   "type": "module",
-  "main": "dist/",
+  "main": "dist/lib/",
   "scripts": {
     "build": "tsc && tsc-alias",
     "db-backup": "node dist/cli.js"

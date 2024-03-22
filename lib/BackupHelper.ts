@@ -1,3 +1,7 @@
+import File from '@lib/util/FileHelper.js'
+import { Collection, connect, disconnect, set } from 'mongoose';
+import { DbHelperError } from '@lib/util/ErrorHelper.js';
+
 interface BackupOptions {
     outDir: `\\${string}\\`,
     connectionString: string
@@ -36,25 +40,28 @@ export class BackupHelper {
 
             //Create Temp Dir
             try {
-                createDirectoryIfNotExists(tempDir)
-            }catch(e) {
-                throw e;
+                File.createDirectoryIfNotExists(tempDir)
+            } catch (e) {
+                throw new DbHelperError(e);
             }
-            
+
 
             // iterate over all collections and write the data to the json files
 
-            Promise //@ts-expect-error
+            const endResult = await Promise //@ts-expect-error
                 .allSettled(collections.map(collection => this.handleCollection(collection)))
-                .then(results => {
+                .then(async results => {
                     // Check if all promises were fulfilled
                     const allFulfilled = results.every(result => result.status === 'fulfilled');
                     if (allFulfilled) {
-                        createZipFromDirectory(tempDir, outputDir, true);
+                        const endResult = await File.createZipFromDirectory(tempDir, outputDir, true);
+                        return endResult;
                     } else {
                         throw new Error("Some collections were not handled successfully.")
                     }
                 });
+            disconnect();
+            return endResult;
         }
     }
 
@@ -75,10 +82,10 @@ export class BackupHelper {
         const foundedEntry = collection.find();
         const fileName = process.cwd() + `\\temp\\${collection.collectionName}.json`;
         if (!foundedEntry) {
-            createFileIfNotExists(fileName, []);
+            File.createFileIfNotExists(fileName, []);
         }
         else {
-            createFileIfNotExists(fileName, JSON.stringify(await foundedEntry.toArray(), null, 2));
+            File.createFileIfNotExists(fileName, JSON.stringify(await foundedEntry.toArray(), null, 2));
         }
     }
 }
