@@ -13,13 +13,15 @@
     "prompts": "^2.4.2",
     "zip-a-folder": "^3.1.6"
   },
-  "name": "@voroniyx/db-tools",
-  "version": "1.0.0",
+  "name": "voroniyx-dbtools",
+  "version": "1.0.3",
   "type": "module",
-  "main": "dist/lib/",
+  "types": "package/BackupHelper.d.ts",
+  "main": "package/BackupHelper.js",
   "scripts": {
     "build": "tsc && tsc-alias",
-    "db-backup": "node dist/cli.js"
+    "db-backup": "node dist/cli.js",
+    "build-package": "tsc --project tsconfig.build.json && tsc-alias"
   },
   "author": "Voroniyx",
   "license": "MIT",
