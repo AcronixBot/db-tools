@@ -1,16 +1,12 @@
 # MongoDB Tools
 
-This Repo includes some tools to make the work easer with MongoDB. Whether you're safeguarding your data with backups, restoring from previous backups, synchronizing local schemas with your MongoDB database, or updating entries in collections based on local schemas, this repository should provide a versatile set of tools to simplify your workflow.
+This Repo includes some tools to make the work easer with MongoDB. Whether you're safeguarding your data with backups or restoring from previous backups, this repository should provide a versatile set of tools to simplify your workflow.
 
 ### Key Features:
 
 - **Backup Utility**: Efficiently create backups of MongoDB databases with just a simple command. Protect your valuable data and ensure its availability in case of unforeseen circumstances.
 
 - **Restore Tool** _(Planned)_: Seamlessly restore databases from previously created backups. Quickly recover from data loss or corruption incidents with minimal downtime.
-
-- **Schema Synchronization** _(Planned)_: Compare and synchronize local schemas with your MongoDB database effortlessly. Ensure consistency and integrity across your data infrastructure with ease.
-
-- **Collection Entry Update** _(Planned)_: Update entries in collections within your MongoDB database based on local schemas. Keep your data up-to-date and in sync with your application requirements without manual intervention.
 
 ## Create a Backup
 
@@ -43,9 +39,8 @@ The Backup will be safed in a .zip in `backup` when `zip` is `true`. Or the json
 ## TODOS
 
 - [ ] DatabaseRestore Command
-- [ ] DatabaseCompare Command
-- [ ] Rewort the CLI file and create a better command handler
+- [ ] Rework the CLI file and create a better command handler
 
 ## Contribute
 
-If you want to contribute something i am open for it
+If you want to contribute something, i am open for it
