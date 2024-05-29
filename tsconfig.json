@@ -16,5 +16,5 @@
       "@lib/*": ["lib/*"]
     }
   },
-  "include": ["src", "src/index.ts", "lib"]
+  "include": ["src", "lib"]
 }

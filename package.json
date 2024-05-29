@@ -14,14 +14,14 @@
     "zip-a-folder": "^3.1.6"
   },
   "name": "voroniyx-dbtools",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "type": "module",
   "types": "package/BackupHelper.d.ts",
   "main": "package/BackupHelper.js",
   "scripts": {
     "build": "tsc && tsc-alias",
     "db-backup": "node dist/cli.js",
-    "build-package": "tsc --project tsconfig.build.json && tsc-alias"
+    "build-package": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json"
   },
   "author": "Voroniyx",
   "license": "MIT",
