@@ -40,7 +40,7 @@ The Backup will be safed in a .zip in `backup` when `zip` is `true`. Or the json
 
 - [ ] DatabaseRestore Command
 - [ ] Rework the CLI file and create a better command handler
-
+- [ ] Detailed Backup Informations (path, filename, size, collectionCount, time used (currently not done be the project)
 ## Contribute
 
 If you want to contribute something, i am open for it
