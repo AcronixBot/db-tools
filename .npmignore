@@ -6,3 +6,4 @@ src
 index.test.js
 tsconfig.json
 lib
+.env
