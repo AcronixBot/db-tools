@@ -1,0 +1,9 @@
+config
+.github
+node_modules
+src
+.gitignore
+index.test.js
+tsconfig.json
+lib
+.env

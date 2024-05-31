@@ -7,7 +7,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "dist/",
+    "outDir": "package/",
     "baseUrl": "./",
     "pretty": true,
     "declaration": true,
@@ -16,5 +16,5 @@
       "@lib/*": ["lib/*"]
     }
   },
-  "include": ["src", "lib"]
+  "include": ["lib"]
 }

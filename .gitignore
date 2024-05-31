@@ -6,3 +6,8 @@ config
 temp
 test
 backup
+*test.js
+*test.ts
+testOutDir
+package
+.env
