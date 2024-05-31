@@ -10,3 +10,4 @@ backup
 *test.ts
 testOutDir
 package
+.env

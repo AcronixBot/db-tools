@@ -1,11 +1,16 @@
 import File from "@lib/util/FileHelper.js";
 import { Collection, connect, disconnect, set } from "mongoose";
 import { DbHelperError } from "@lib/util/ErrorHelper.js";
-import * as path from "path";
 
 interface BackupOptions {
   outDir: `\\${string}\\`;
   connectionString: string;
+}
+
+export interface BackUpResult {
+  timestamp: number;
+  fileName: string;
+  outDirPath: string;
 }
 
 export class BackupHelper {
@@ -27,7 +32,8 @@ export class BackupHelper {
     }
   }
 
-  public async create() {
+  public async create(): Promise<BackUpResult> {
+    const startTimestamp = new Date().getTime();
     const database = this.extractDatabaseFromURI(this.options.connectionString);
     if (!database) {
       throw new Error(
@@ -79,8 +85,7 @@ export class BackupHelper {
         if (allFulfilled) {
           const endResult = await File.createZipFromDirectory(
             tempDir,
-            outputDir,
-            true
+            outputDir
           );
           return endResult;
         } else {
@@ -90,7 +95,11 @@ export class BackupHelper {
         }
       });
       disconnect();
-      return endResult;
+      return {
+        fileName: endResult.fileName,
+        outDirPath: endResult.outPath,
+        timestamp: new Date().getTime() - startTimestamp,
+      };
     }
   }
 

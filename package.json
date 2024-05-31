@@ -8,20 +8,23 @@
   },
   "dependencies": {
     "commander": "^12.0.0",
+    "dotenv": "^16.4.5",
     "mongoose": "^8.1.3",
     "picocolors": "^1.0.0",
+    "pretty-ms": "^9.0.0",
     "prompts": "^2.4.2",
     "zip-a-folder": "^3.1.6"
   },
   "name": "voroniyx-dbtools",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "types": "package/BackupHelper.d.ts",
   "main": "package/BackupHelper.js",
   "scripts": {
     "build": "tsc && tsc-alias",
     "db-backup": "node dist/cli.js",
-    "build-package": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json"
+    "build-package": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "test:lib:backup": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json && node tests/lib/index.js"
   },
   "author": "Voroniyx",
   "license": "MIT",
