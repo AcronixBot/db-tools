@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DB_CON: ${{ secrets.DB_CON }}
     steps:
       - uses: actions/checkout@v3
 
