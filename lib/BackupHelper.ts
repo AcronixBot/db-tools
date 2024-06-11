@@ -11,6 +11,7 @@ export interface BackUpResult {
   timestamp: number;
   fileName: string;
   outDirPath: string;
+  fileSizeBytes: number;
 }
 
 export class BackupHelper {
@@ -95,10 +96,14 @@ export class BackupHelper {
         }
       });
       disconnect();
+
+      const size = await File.getFileSizeFromFilePath(endResult.outPath);
+
       return {
         fileName: endResult.fileName,
         outDirPath: endResult.outPath,
         timestamp: new Date().getTime() - startTimestamp,
+        fileSizeBytes: size,
       };
     }
   }

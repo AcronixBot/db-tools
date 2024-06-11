@@ -16,7 +16,7 @@
     "zip-a-folder": "^3.1.6"
   },
   "name": "voroniyx-dbtools",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "types": "package/BackupHelper.d.ts",
   "main": "package/BackupHelper.js",

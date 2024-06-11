@@ -4,6 +4,22 @@ import * as path from "path";
 import { DbHelperError } from "@lib/util/ErrorHelper.js";
 
 export default class File {
+  public static async getFileSizeFromFilePath(filePath: string) {
+    try {
+      const stats = await fs.promises.stat(filePath);
+
+      if (!stats.isFile()) {
+        throw new DbHelperError(
+          `The path does not point to a file: ${filePath}`
+        );
+      }
+
+      return stats.size;
+    } catch (err) {
+      throw new DbHelperError(`Error reading file: ${err.message}`);
+    }
+  }
+
   public static async createDirectoryIfNotExists(directoryPath: string) {
     try {
       const directoryExists = await fs.promises

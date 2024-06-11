@@ -20,6 +20,7 @@ creationResult.then((result) => {
 
   console.log(prefix + "Outpath: " + result.outDirPath);
   console.log(prefix + "Filename: " + result.fileName);
+  console.log(prefix + "Size (Bytes): " + result.fileSizeBytes);
 
   const doesPathExists = fs.existsSync(result.outDirPath);
 
